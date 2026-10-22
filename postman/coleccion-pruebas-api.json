@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "Pruebas de API REST - JSONPlaceholder",
+    "description": "Colección en español para practicar solicitudes REST, validar respuestas y documentar resultados. API-003 se conserva como observación manual pendiente de revisión colaborativa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "API-001 - Consultar todas las publicaciones",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts",
+        "description": "Consultar la lista de publicaciones y validar el código HTTP y la estructura de la respuesta."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El código de respuesta es 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"El cuerpo es una lista JSON con elementos\", function () {",
+              "  const datos = pm.response.json();",
+              "  pm.expect(datos).to.be.an(\"array\");",
+              "  pm.expect(datos.length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API-002 - Consultar publicación por identificador",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts/1",
+        "description": "Consultar la publicación con identificador 1 y comprobar los campos principales."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El código de respuesta es 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"La respuesta contiene los campos esperados\", function () {",
+              "  const datos = pm.response.json();",
+              "  pm.expect(datos).to.have.property(\"id\", 1);",
+              "  pm.expect(datos).to.have.property(\"userId\");",
+              "  pm.expect(datos).to.have.property(\"title\");",
+              "  pm.expect(datos).to.have.property(\"body\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API-003 - Consultar identificador inexistente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts/9999",
+        "description": "Caso negativo en revisión. En la ejecución registrada se observó 404 Not Found y el cuerpo {}. Revisar con otro estudiante el resultado esperado antes de añadir aserciones automáticas."
+      }
+    },
+    {
+      "name": "API-004 - Filtrar publicaciones por usuario",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/posts?userId=1",
+        "description": "Consultar publicaciones del usuario 1 y comprobar que todos los elementos devueltos corresponden al filtro."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El código de respuesta es 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Todas las publicaciones corresponden al usuario 1\", function () {",
+              "  const datos = pm.response.json();",
+              "  pm.expect(datos).to.be.an(\"array\");",
+              "  datos.forEach(function (publicacion) {",
+              "    pm.expect(publicacion.userId).to.eql(1);",
+              "  });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API-005 - Crear una publicación",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/posts",
+        "description": "Enviar una publicación de ejemplo en español. JSONPlaceholder simula la creación y no almacena el registro de forma permanente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"title\": \"Prueba de API con Postman\",\n  \"body\": \"Publicación creada durante el ejercicio de pruebas de API.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"La respuesta indica creación exitosa\", function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "pm.test(\"La respuesta refleja los datos enviados\", function () {",
+              "  const datos = pm.response.json();",
+              "  pm.expect(datos.title).to.eql(\"Prueba de API con Postman\");",
+              "  pm.expect(datos.body).to.eql(\"Publicación creada durante el ejercicio de pruebas de API.\");",
+              "  pm.expect(datos.userId).to.eql(1);",
+              "  pm.expect(datos).to.have.property(\"id\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API-006 - Actualizar una publicación completa",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/posts/1",
+        "description": "Enviar todos los campos de la publicación. La API devuelve una respuesta simulada, sin cambio permanente de sus datos.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"title\": \"Título actualizado mediante PUT\",\n  \"body\": \"Cuerpo actualizado para la prueba PUT.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El código de respuesta es 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"La respuesta refleja los campos enviados\", function () {",
+              "  const datos = pm.response.json();",
+              "  pm.expect(datos.id).to.eql(1);",
+              "  pm.expect(datos.title).to.eql(\"Título actualizado mediante PUT\");",
+              "  pm.expect(datos.body).to.eql(\"Cuerpo actualizado para la prueba PUT.\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API-007 - Actualizar parcialmente el título",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/posts/1",
+        "description": "Enviar solo el campo title para comprobar una actualización parcial. No se valida el contenido de body porque no se envía en esta solicitud.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Título actualizado mediante PATCH\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El código de respuesta es 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"La respuesta contiene el título actualizado\", function () {",
+              "  const datos = pm.response.json();",
+              "  pm.expect(datos.title).to.eql(\"Título actualizado mediante PATCH\");",
+              "  pm.expect(datos).to.have.property(\"id\", 1);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "API-008 - Enviar solicitud de eliminación",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/posts/1",
+        "description": "Enviar una solicitud de eliminación y validar el código observado. JSONPlaceholder simula la operación."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"El código de respuesta es 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://jsonplaceholder.typicode.com",
+      "type": "string"
+    }
+  ]
+}
